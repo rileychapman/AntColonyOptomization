@@ -15,7 +15,7 @@ class Ant(object):
         self.alpha = alpha
         self.beta = beta
         
-    def nextLocations(visitedPoints, pheromones):
+    def nextLocation(self,visitedPoints, pheromones):
         """
         moves a given ant to a new point from remaining points
         """
@@ -24,9 +24,15 @@ class Ant(object):
         for i in range(len(self.points)):
             if self.points[i] not in visitedPoints:
                 possiblePoint = self.points[i]
+                #print "visited points " + str(visitedPoints)
                 lastPoint = visitedPoints[-1]
+                #print "last point " + str(lastPoint)
                 distance = sqrt((possiblePoint[0] - lastPoint[0])**2 + (possiblePoint[1] - lastPoint[1])**2)
-                pheromoneLevel = pheromone[self.points.index(possiblePoint)][self.points.index(lastPoint)]
+                print pheromones
+                indexI = self.points.index(possiblePoint)
+                indexJ = self.points.index(lastPoint)
+                print indexI, indexJ
+                pheromoneLevel = pheromones[indexI][indexJ]
                 numerator = self.alpha*pheromoneLevel + self.beta*(1/distance)
                 numerators.append(numerator)
                 notVisitedPoints.append(self.points[i])
@@ -41,13 +47,13 @@ class Ant(object):
         newPoint = self.points[choice(weightedIndexes)]
         return newPoint
 
-    def takeATour(pheromones):
+    def takeATour(self,pheromones):
         """
         take all points and make a given ant move to that point 
         """
-        visitedPoints = self.points[self.startPointIndex]
+        visitedPoints = [self.points[self.startPointIndex]]
         for i in range(len(self.points)-1):
-            newLocation = nextLocation(visitedPoints, pheromones)
+            newLocation = self.nextLocation(visitedPoints, pheromones)
             visitedPoints.append(newLocation)
         return visitedPoints.append(self.points[startPointIndex])
 
@@ -71,7 +77,7 @@ class AntWorld(object):
         for i in range(ants):
             self.ants.append(Ant(points, alpha, beta))
     
-    def updatePheromones(tours):
+    def updatePheromones(self,tours):
         """
         update pheromone levels in world
         """
@@ -83,15 +89,15 @@ class AntWorld(object):
                 self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])] = 1/distance + self.evaporation*self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])]
                 self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])] = 1/distance + self.evaporation*self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])] 
         
-    def antTours():
+    def antTours(self):
         tourPoints = []
         for ant in self.ants:
             tourPoints.append(ant.takeATour(self.pheromones))
         updatePheromones(tourPoints) 
 
-    def generateTours(generations):
+    def generateTours(self, generations):
         for i in range(generations):
-            antTours()
+            self.antTours()
     
 if __name__ == "__main__":
 	
