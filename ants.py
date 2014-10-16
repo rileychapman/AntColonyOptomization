@@ -2,6 +2,7 @@
 import numpy as np
 from random import randint, choice
 from math import sqrt
+import matplotlib.pyplot as plt
 
 class Ant(object):
     
@@ -87,19 +88,23 @@ class AntWorld(object):
 #        print "tours" + str(tours)
         for tour in tours:
             distance = 0
-            for i in range(len(tour)-2):
-                distance += sqrt((tour[i][0]-tour[i+1][0])**2 + (tour[i][1]-tour[i+1][1])**2)
-            for i in range(len(tour)-2):
+            '''not sure about the -1... might be -2?'''
+            for i in range(len(tour)-1):
+                distance += sqrt(
+                        (tour[i][0]-tour[i+1][0])**2 
+                        + (tour[i][1]-tour[i+1][1])**2
+                        )
+            for i in range(len(tour)-1):
                 self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])] = (
-						1/distance 
-						+ self.evaporation
-						* self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])]
-						)
+                        1/distance 
+                        + self.evaporation
+                        * self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])]
+                        )
                 self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])] = (
-						1/distance 
-						+ self.evaporation
-						* self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])]
-						)
+                        1/distance 
+                        + self.evaporation
+                        * self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])]
+                        )
         
     def antTours(self):
         tourPoints = []
@@ -110,17 +115,24 @@ class AntWorld(object):
     def generateTours(self, generations):
         for i in range(generations):
             self.antTours()
+
+    def draw(self):
+        for i in range(len(self.points)):
+            print i
+            for j in range(i):
+                print "i, j: " + str(i) + str(j) 
+                print self.pheromones[i][j]
+            
     
 if __name__ == "__main__":
 	
-    alpha = 1.
-    beta = 1.
+    alpha = 50 
+    beta = 20
     evaporation = .75
     points = [[1.,2.], [3.,2.], [5.,10.], [1.5, .3], [0.,0.]]
     ants = 20
     generations = 5
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
-    antworld.generateTours(20)
+    antworld.generateTours(generations)
+    antworld.draw()
     print antworld.pheromones
-
-
