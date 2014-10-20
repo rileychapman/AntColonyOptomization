@@ -3,6 +3,7 @@ import numpy as np
 from random import randint, choice
 from math import sqrt
 import matplotlib.pyplot as plt
+import networkx as nx
 
 class Ant(object):
     
@@ -11,13 +12,13 @@ class Ant(object):
         points must be a list of lists of points
         alpha and beta are the respective scaling factors for J and d
         """
-        #self.startPointIndex = randint(0, len(points)-1)
-        self.startPointIndex = 0
+        self.startPointIndex = randint(0, len(points)-1)
+        #self.startPointIndex = 0
         self.points = points
         self.alpha = alpha
         self.beta = beta
         
-    def nextLocation(self,visitedPoints, pheromones):
+    def nextLocation(self, visitedPoints, pheromones):
         """
         moves a given ant to a new point from remaining points
         """
@@ -26,16 +27,13 @@ class Ant(object):
         for i in range(len(self.points)):
             if self.points[i] not in visitedPoints:
                 possiblePoint = self.points[i]
-                #print "visited points " + str(visitedPoints)
                 lastPoint = visitedPoints[-1]
-                #print "last point " + str(lastPoint)
                 distance = sqrt((possiblePoint[0] - lastPoint[0])**2 + (possiblePoint[1] - lastPoint[1])**2)
-                #print "pheromones: " + str(pheromones)
                 indexI = self.points.index(possiblePoint)
                 indexJ = self.points.index(lastPoint)
-                #print "indexes: " + str(indexI) + str(indexJ)
                 pheromoneLevel = pheromones[indexI][indexJ]
                 numerator = self.alpha*pheromoneLevel + self.beta*(1/distance)
+                print numerator
                 numerators.append(numerator)
                 notVisitedPoints.append(self.points[i])
         denominator = sum(numerators)
@@ -45,12 +43,11 @@ class Ant(object):
         weightedIndexes = []
         for i in range(len(notVisitedPoints)):
             index = self.points.index(notVisitedPoints[i])
-            #print probabilities[i]
             weightedIndexes += [index]*probabilities[i]
         newPoint = self.points[choice(weightedIndexes)]
         return newPoint
 
-    def takeATour(self,pheromones):
+    def takeATour(self, pheromones):
         """
         take all points and make a given ant move to that point 
         """
@@ -68,24 +65,13 @@ class AntWorld(object):
         self.alpha = alpha
         self.beta = beta
         self.evaporation = evaporation
-        self.ants = []
-        '''make empty pheromones'''
-        pheromones = []
-        for i in range(len(points)):
-            row = []
-            for j in range(len(points)):
-                 row.append(0)
-            pheromones.append(row)
-        self.pheromones = pheromones
-        '''create list of ant instances'''
-        for i in range(ants):
-            self.ants.append(Ant(points, alpha, beta))
+        self.pheromones = [[0 for j in range(len(points))] for i in range(len(points))]
+        self.ants = [Ant(points, alpha, beta) for a in range(ants)]
     
     def updatePheromones(self,tours):
         """
         update pheromone levels in world
         """
-#        print "tours" + str(tours)
         for tour in tours:
             distance = 0
             '''not sure about the -1... might be -2?'''
@@ -117,22 +103,34 @@ class AntWorld(object):
             self.antTours()
 
     def draw(self):
+        G = nx.Graph()
+        edge_colors = list()
+        min_pher = np.ma.masked_equal(self.pheromones, 0.0, copy=False).min()
+        max_pher = np.max(self.pheromones)
         for i in range(len(self.points)):
-            print i
+            G.add_node(i, posxy=(points[i]))
             for j in range(i):
-                print "i, j: " + str(i) + str(j) 
-                print self.pheromones[i][j]
-            
+                G.add_edge(i, j)
+                edge_color = tuple((1-(self.pheromones[i][j]-min_pher)/(max_pher-min_pher) for c in range(len('rgb'))))
+                edge_colors.append(edge_color)
+        pos = nx.get_node_attributes(G, 'posxy')
+        nx.draw(
+                G,
+                pos,
+                node_size=200,
+                edge_color=edge_colors,
+                width=3
+                )
+        plt.show()
     
 if __name__ == "__main__":
 	
-    alpha = 50 
-    beta = 20
+    alpha = 1 
+    beta = 1
     evaporation = .75
     points = [[1.,2.], [3.,2.], [5.,10.], [1.5, .3], [0.,0.]]
-    ants = 20
-    generations = 5
+    ants =20
+    generations = 50
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
     antworld.generateTours(generations)
     antworld.draw()
-    print antworld.pheromones
