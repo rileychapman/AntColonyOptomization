@@ -12,8 +12,8 @@ class Ant(object):
         points must be a list of lists of points
         alpha and beta are the respective scaling factors for J and d
         """
-        self.startPointIndex = randint(0, len(points)-1)
-        #self.startPointIndex = 0
+        #self.startPointIndex = randint(0, len(points)-1)
+        self.startPointIndex = 0
         self.points = points
         self.alpha = alpha
         self.beta = beta
@@ -33,7 +33,6 @@ class Ant(object):
                 indexJ = self.points.index(lastPoint)
                 pheromoneLevel = pheromones[indexI][indexJ]
                 numerator = self.alpha*pheromoneLevel + self.beta*(1/distance)
-                print numerator
                 numerators.append(numerator)
                 notVisitedPoints.append(self.points[i])
         denominator = sum(numerators)
@@ -65,7 +64,8 @@ class AntWorld(object):
         self.alpha = alpha
         self.beta = beta
         self.evaporation = evaporation
-        self.pheromones = [[0 for j in range(len(points))] for i in range(len(points))]
+        self.pheromones = np.zeros([len(self.points), len(self.points)])
+        np.fill_diagonal(self.pheromones, -1)
         self.ants = [Ant(points, alpha, beta) for a in range(ants)]
     
     def updatePheromones(self,tours):
@@ -105,13 +105,13 @@ class AntWorld(object):
     def draw(self):
         G = nx.Graph()
         edge_colors = list()
-        min_pher = np.ma.masked_equal(self.pheromones, 0.0, copy=False).min()
+        min_pher = np.ma.masked_equal(self.pheromones, -1, copy=False).min()
         max_pher = np.max(self.pheromones)
         for i in range(len(self.points)):
             G.add_node(i, posxy=(points[i]))
             for j in range(i):
                 G.add_edge(i, j)
-                edge_color = tuple((1-(self.pheromones[i][j]-min_pher)/(max_pher-min_pher) for c in range(len('rgb'))))
+                edge_color = tuple((1-(self.pheromones[i][j])/(max_pher-min_pher) for c in range(len('rgb'))))
                 edge_colors.append(edge_color)
         pos = nx.get_node_attributes(G, 'posxy')
         nx.draw(
@@ -119,7 +119,7 @@ class AntWorld(object):
                 pos,
                 node_size=200,
                 edge_color=edge_colors,
-                width=3
+                width=3,
                 )
         plt.show()
     
@@ -128,9 +128,9 @@ if __name__ == "__main__":
     alpha = 1 
     beta = 1
     evaporation = .75
-    points = [[1.,2.], [3.,2.], [5.,10.], [1.5, .3], [0.,0.]]
-    ants =20
-    generations = 50
+    points = [[0., 0.], [3.,0.], [4., 2.], [3, 3.], [2., 2.]]
+    ants = 1
+    generations = 2
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
     antworld.generateTours(generations)
     antworld.draw()
