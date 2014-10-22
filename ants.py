@@ -104,7 +104,7 @@ class AntWorld(object):
             for i in range(len(tour)-1):
                 addition = (1/distance**2)*50
                 currentLevel = self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])]
-                print "Current: "+ str(currentLevel)+ " + "+str(addition)+" = "+str(addition + currentLevel)
+                #print "Current: "+ str(currentLevel)+ " + "+str(addition)+" = "+str(addition + currentLevel)
                 self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])] +=  addition 
                 self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])] += addition 
 
@@ -148,13 +148,18 @@ if __name__ == "__main__":
 	
     alpha = 1 
     beta = 3
-    evaporation = .8
+    evaporation = .7
     points = [[0., 0.], [3.,0.], [4., 2.], [3, 3.], [2., 2.]]
     ants = 1
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
     while True:
-        generations = input('run generations: ')
-        antworld.generateTours(generations)
-        print "Best Path: "+str(antworld.bestPathDistance)+" "+str(antworld.bestPath)
-        print antworld.pheromones
-        #antworld.draw()
+        command = input(': ')
+        if command == 0:
+            break
+        elif command == -1:
+            print antworld.pheromones
+        elif command == -2:
+            antworld.draw()
+        else: 
+            antworld.generateTours(command)
+            print "Best Path: "+str(antworld.bestPathDistance)+" "+str(antworld.bestPath)
