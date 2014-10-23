@@ -60,6 +60,11 @@ class Ant(object):
             newLocation = self.nextLocation(visitedPoints, pheromones)
             visitedPoints.append(newLocation)
         visitedPoints.append(self.points[self.startPointIndex])
+        #print visitedPoints
+        visitedPointsIndex = []
+        for point in visitedPoints:
+            visitedPointsIndex.append(self.points.index(point))
+        #print visitedPointsIndex
         return visitedPoints
 
 class AntWorld(object):
@@ -102,7 +107,7 @@ class AntWorld(object):
                 self.bestPathDistance = distance
 
             for i in range(len(tour)-1):
-                addition = (1/distance**2)*50
+                addition = (1/distance**2)*200
                 currentLevel = self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])]
                 #print "Current: "+ str(currentLevel)+ " + "+str(addition)+" = "+str(addition + currentLevel)
                 self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])] +=  addition 
@@ -146,20 +151,27 @@ class AntWorld(object):
     
 if __name__ == "__main__":
 	
-    alpha = 1 
-    beta = 3
-    evaporation = .7
-    points = [[0., 0.], [3.,0.], [4., 2.], [3, 3.], [2., 2.]]
-    ants = 1
+    alpha = 3 
+    beta = 1
+    evaporation = .8
+    points = [[0., 0.], [3.,0.], [4., 2.], [3., 3.], [1.6, 2.]]
+    points = [[0., 0.], [1., 0.], [2., 1.], [3., 3.], [1., 2.], [2., 4.], [1.5, 2.5], [1., 3.], [1.5, 4.], [0., 2.]]
+    ants = 10
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
     while True:
         command = input(': ')
         if command == 0:
             break
         elif command == -1:
-            print antworld.pheromones
+            print antworld.bestPath
         elif command == -2:
             antworld.draw()
         else: 
             antworld.generateTours(command)
-            print "Best Path: "+str(antworld.bestPathDistance)+" "+str(antworld.bestPath)
+            print antworld.bestPathDistance
+            print antworld.pheromones
+            bestWorldPathIndex = []
+            for point in antworld.bestPath:
+                bestWorldPathIndex.append(points.index(point))
+            print bestWorldPathIndex
+            print antworld.bestPath
