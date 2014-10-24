@@ -80,11 +80,15 @@ class AntWorld(object):
         self.ants = [Ant(points, alpha, beta) for a in range(ants)]
         self.bestPath = []
         self.bestPathDistance = -1
+        self.totalAnts = 0
     
     def updatePheromones(self,tours):
         """
         update pheromone levels in world
         """
+        self.totalAnts += 1
+
+
 
         for i in range(len(self.points)):
             for j in range(i):
@@ -113,6 +117,7 @@ class AntWorld(object):
                 self.pheromones[self.points.index(tour[i])][self.points.index(tour[i+1])] +=  addition 
                 self.pheromones[self.points.index(tour[i+1])][self.points.index(tour[i])] += addition 
 
+            print str(self.totalAnts)+", "+str(self.bestPathDistance)
         
     def antTours(self):
         tourPoints = []
@@ -156,7 +161,7 @@ if __name__ == "__main__":
     evaporation = .8
     points = [[0., 0.], [3.,0.], [4., 2.], [3., 3.], [1.6, 2.]]
     points = [[0., 0.], [1., 0.], [2., 1.], [3., 3.], [1., 2.], [2., 4.], [1.5, 2.5], [1., 3.], [1.5, 4.], [0., 2.]]
-    ants = 10
+    ants = 1
     antworld = AntWorld(points, alpha, beta, ants, evaporation)
     while True:
         command = input(': ')
@@ -168,10 +173,5 @@ if __name__ == "__main__":
             antworld.draw()
         else: 
             antworld.generateTours(command)
-            print antworld.bestPathDistance
-            print antworld.pheromones
-            bestWorldPathIndex = []
-            for point in antworld.bestPath:
-                bestWorldPathIndex.append(points.index(point))
-            print bestWorldPathIndex
-            print antworld.bestPath
+            #print antworld.bestPathDistance
+            
